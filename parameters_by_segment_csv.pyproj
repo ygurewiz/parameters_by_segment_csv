@@ -12,7 +12,7 @@
     <Name>parameters_by_segment_csv</Name>
     <RootNamespace>parameters_by_segment_csv</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Users\user\source\utils\parameters_by_segment_csv\akin_segments.csv" "C:\Users\user\source\utils\parameters_by_segment_csv\008-S.json" 4</CommandLineArguments>
+    <CommandLineArguments>"C:\Users\user\source\utils\parameters_by_segment_csv\akin_segments.csv" "C:\Users\user\source\utils\parameters_by_segment_csv\V1.30.24_P1.125_main_params.json" 4</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

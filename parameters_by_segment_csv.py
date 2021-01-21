@@ -4,9 +4,9 @@ import json
 import str
 import string
 
-def createJsonFileLines(robotSegmentsList,data,newJsonFile,width):
+def createJsonFileLines(robotSegmentsList,data,newJsonFile,panelWidth):
 
-    res = createJsonData(data,robotSegmentsList,width)
+    res = createJsonData(data,robotSegmentsList,panelWidth)
 
     addLineToJson(True,'{\n',res,newJsonFile,False)
     length = 0
@@ -87,7 +87,7 @@ def addLineToJson(istoken,headToken,res,newJsonFile,islast):
 
     
 
-def createJsonData(data,robotSegmentsList,width):
+def createJsonData(data,robotSegmentsList,panelWidth):
     res = {}
     for param in data:
         if(param=='surface_map'):
@@ -100,13 +100,17 @@ def createJsonData(data,robotSegmentsList,width):
                         res[param].append(surfaceJsonData[i])
                         continue
                 surfaceDict = robotSegmentsList[i]
-      
+
                 if(surfaceDict["Entity"]=='Tracker'):
-                    surfaceJsonData[i]['type']=3
-                    surfaceJsonData[i]['length']=int(int(surfaceDict['Area'])*1000/int(width))
+                    surfaceJsonData[i]['type']=2
+                    surfaceJsonData[i]['length']=int(int(surfaceDict['Area'])*1000/int(panelWidth))
+                    surfaceJsonData[i]['width']=3920         #hard coded!
+                    surfaceJsonData[i]['east']=2320         #hard coded!
 
                 elif(surfaceDict["Entity"]=='Bridge'):
-                    surfaceJsonData[i]['type']=2
+                    surfaceJsonData[i]['type']=3
+                    surfaceJsonData[i]['width']=600         #hard coded!
+                    surfaceJsonData[i]['east']=2020         #hard coded!
                     if('-' in surfaceDict['Gap']):
                         gaps = surfaceDict['Gap'].split('-')
                         gap = max(int(gaps[0]),int(gaps[1]))
@@ -124,7 +128,10 @@ def createJsonData(data,robotSegmentsList,width):
 
                 elif(surfaceDict["Entity"]=='Dock'):
                     surfaceJsonData[i]['type']=1
+                    surfaceJsonData[i]['width']=900              #hard coded!
+                    surfaceJsonData[i]['east']=2320             #hard coded!
                     if(surfaceDict['Gap']=='Edge'):
+                        data["parking_type"]=1                  #edge table
                         surfaceJsonData[i]['length']=750
                         parkingType = surfaceDict['Row'].split('-')[2]
                         if(parkingType=='01'):
@@ -163,7 +170,7 @@ def createJsonData(data,robotSegmentsList,width):
             #print(param)
     return res
 
-def parseLines(csvSurfacesFileName,robotParamsFileName,width):
+def parseLines(csvSurfacesFileName,robotParamsFileName,panelWidth):
     i=0
     numRobots = 0
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
@@ -178,8 +185,6 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,width):
         doneRobot = currentRobot
         for line in csvReader:
             i+=1
-            #if(line['Row']=='E-077-01'):
-             #   print('0')
             if(newRobot):
                 currentRobot=line['Row']
                 newRobot = False
@@ -187,6 +192,8 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,width):
                 print(currentRobot)
             else:
                 if(not line['Row']==currentRobot):
+                    if(line['Row']==''):
+                        continue
                     doneRobot = currentRobot
                     currentRobot = line['Row']
                     newRobot = True
@@ -195,16 +202,12 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,width):
                     numRobots+=1
 
                     newJsonFile = open(doneRobot+'.json','+w')
-                    createJsonFileLines(doneList,data,newJsonFile,width)
+                    createJsonFileLines(doneList,data,newJsonFile,panelWidth)
                     newJsonFile.close()
-                    #print(i)
                 
                 robotSegmentsList.append(line)
-                #print(line)
-            #if(numRobots==2):
-            #    break
         newJsonFile = open(currentRobot+'.json','+w')
-        createJsonFileLines(robotSegmentsList,data,newJsonFile,width)
+        createJsonFileLines(robotSegmentsList,data,newJsonFile,panelWidth)
         newJsonFile.close()
 
         
@@ -217,7 +220,7 @@ def main(argv):
     if(len(argv)<4):
         print("error in input")
         return
-    width = argv[3]
+    panelWidth = argv[3]
     numRows,numRobots= parseLines(argv[1],argv[2],argv[3])
     print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
 
