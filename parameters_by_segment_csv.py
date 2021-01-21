@@ -3,6 +3,7 @@ import csv
 import json
 import str
 import string
+import os
 
 def createJsonFileLines(robotSegmentsList,data,newJsonFile,panelWidth):
 
@@ -170,12 +171,25 @@ def createJsonData(data,robotSegmentsList,panelWidth):
             #print(param)
     return res
 
-def parseLines(csvSurfacesFileName,robotParamsFileName,panelWidth):
+def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
+    panelWidth = 4  #hard coded
     i=0
     numRobots = 0
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
         csvReader = csv.DictReader(csvSurfacesFile)
         jsonFile = open(robotParamsFileName)
+        #jsonDir = robotParamsFileName.split('//')
+        #jsonDir = jsonFile.name.split('.json')[0]
+        #jsonPath = jsonDir
+
+        #if not os.path.isdir(jsonPath):
+        #    try:
+        #        os.mkdir(jsonPath)
+        #    except OSError:
+        #        print ("Creation of the directory %s failed" % jsonPath)
+        #    else:
+        #        print ("Successfully created the directory %s " % jsonPath)
+
         data = json.load(jsonFile)
 
         currentRobot = ''
@@ -201,12 +215,12 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,panelWidth):
                     robotSegmentsList = list()
                     numRobots+=1
 
-                    newJsonFile = open(doneRobot+'.json','+w')
+                    newJsonFile = open(jsonPath+'\\'+doneRobot+'.json','+w')
                     createJsonFileLines(doneList,data,newJsonFile,panelWidth)
                     newJsonFile.close()
                 
                 robotSegmentsList.append(line)
-        newJsonFile = open(currentRobot+'.json','+w')
+        newJsonFile = open(jsonPath+'\\'+currentRobot+'.json','+w')
         createJsonFileLines(robotSegmentsList,data,newJsonFile,panelWidth)
         newJsonFile.close()
 
@@ -216,12 +230,26 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,panelWidth):
     csvSurfacesFile.close()
     return i,numRobots
 
+#def main(argv):
+#    if(len(argv)<4):
+#        print("error in input")
+#        return
+#    panelWidth = argv[3]        #hard coded
+#    numRows,numRobots= parseLines(argv[1],argv[2],argv[3])
+#    print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
+
 def main(argv):
-    if(len(argv)<4):
-        print("error in input")
+    if((len(argv)<1) or (not os.path.isdir(argv[1]))):
         return
-    panelWidth = argv[3]
-    numRows,numRobots= parseLines(argv[1],argv[2],argv[3])
+    theDir = argv[1]
+    csvFileName = theDir+'\\SurfaceMap.csv'
+    jsonFileName = theDir +'\\versionJson.json'
+    
+    VersionNameStr =theDir.split('\\')
+    VersionName = VersionNameStr[len(VersionNameStr)-1]
+
+
+    numRows,numRobots= parseLines(csvFileName,jsonFileName,VersionName,theDir)
     print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
 
 if __name__=="__main__":
