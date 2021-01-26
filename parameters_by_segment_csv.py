@@ -6,9 +6,9 @@ import string
 import os
 import subprocess
 
-def createJsonFileLines(robotSegmentsList,data,newJsonFile,panelWidth):
+def createJsonFileLines(robotSegmentsList,data,newJsonFile):
 
-    res = createJsonData(data,robotSegmentsList,panelWidth)
+    res = createJsonData(data,robotSegmentsList)
 
     addLineToJson(True,'{\n',res,newJsonFile,False)
     length = 0
@@ -86,7 +86,7 @@ def addLineToJson(istoken,headToken,res,newJsonFile,islast):
     else:
         print(headToken)
 
-def createJsonData(data,robotSegmentsList,panelWidth):
+def createJsonData(data,robotSegmentsList):
     res = {}
     for param in data:
         if(param=='surface_map'):
@@ -218,7 +218,6 @@ def createJsonData2(data,robotSegmentsList,panelWidth):
     return res
 
 def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
-    panelWidth = 4  #hard coded
     i=0
     numRobots = 0
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
@@ -251,12 +250,12 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
                     numRobots+=1
 
                     newJsonFile = open(jsonPath+'\\'+doneRobot+'.json','+w')
-                    createJsonFileLines(doneList,data,newJsonFile,panelWidth)
+                    createJsonFileLines(doneList,data,newJsonFile)
                     newJsonFile.close()
                 
                 robotSegmentsList.append(line)
         newJsonFile = open(jsonPath+'\\'+currentRobot+'.json','+w')
-        createJsonFileLines(robotSegmentsList,data,newJsonFile,panelWidth)
+        createJsonFileLines(robotSegmentsList,data,newJsonFile)
         newJsonFile.close()
 
         
