@@ -4,6 +4,7 @@ import json
 import str
 import string
 import os
+import subprocess
 
 def createJsonFileLines(robotSegmentsList,data,newJsonFile,panelWidth):
 
@@ -85,9 +86,6 @@ def addLineToJson(istoken,headToken,res,newJsonFile,islast):
     else:
         print(headToken)
 
-
-    
-
 def createJsonData(data,robotSegmentsList,panelWidth):
     res = {}
     for param in data:
@@ -97,7 +95,54 @@ def createJsonData(data,robotSegmentsList,panelWidth):
             p = len(robotSegmentsList)
             for i in range(len(surfaceJsonData)):
                 if(i>len(robotSegmentsList)-1):
-                        surfaceJsonData[i]['type']=0
+                        surfaceJsonData[i]['type']=0        
+                        res[param].append(surfaceJsonData[i])
+                        continue
+                surfaceDict = robotSegmentsList[i]
+
+                surfaceJsonData[i]['width']=int(float(surfaceDict['width(M)'])*1000)
+                surfaceJsonData[i]['type']=int(surfaceDict['type(B=3,D=1,T=2)'])
+                surfaceJsonData[i]['length']=int(float(surfaceDict['length(M)'])*1000)
+
+
+                if(surfaceDict["Entity"]=='Dock'):
+                    if(surfaceDict['parking_type']=='Central'):
+                        data["parking_type"]=1
+                    elif(surfaceDict['parking_type']=='Edge'):
+                        data["parking_type"]=1
+                    elif(surfaceDict['parking_type']=='Revivim'):
+                        data["parking_type"]=4
+
+                    if(surfaceDict['parking_side']=='South'):
+                        data["parking_side"]=0
+                    elif(surfaceDict['parking_side']=='North'):
+                        data["parking_side"]=1
+
+                elif(surfaceDict["Entity"]=='Gap'):
+                    surfaceJsonData[i]['type']=0
+                    gaps = surfaceDict['Gap'].split('-')
+                    gap = max(int(gaps[0]),int(gaps[1]))
+                    surfaceJsonData[i]['length']=gap*10
+
+                res[param].append(surfaceJsonData[i])  
+                #print(param)
+        else:
+            res[param]=[]
+            res[param].append(data[param])
+            #print(param)
+    return res
+    
+
+def createJsonData2(data,robotSegmentsList,panelWidth):
+    res = {}
+    for param in data:
+        if(param=='surface_map'):
+            res[param]=[]
+            surfaceJsonData = data[param]
+            p = len(robotSegmentsList)
+            for i in range(len(surfaceJsonData)):
+                if(i>len(robotSegmentsList)-1):
+                        surfaceJsonData[i]['type']=0        
                         res[param].append(surfaceJsonData[i])
                         continue
                 surfaceDict = robotSegmentsList[i]
@@ -131,6 +176,7 @@ def createJsonData(data,robotSegmentsList,panelWidth):
                     surfaceJsonData[i]['type']=1
                     surfaceJsonData[i]['width']=900              #hard coded!
                     surfaceJsonData[i]['east']=2320             #hard coded!
+                    data["parking_side"]=0
                     if(surfaceDict['Gap']=='Edge'):
                         data["parking_type"]=1                  #edge table
                         surfaceJsonData[i]['length']=750
@@ -178,17 +224,6 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
         csvReader = csv.DictReader(csvSurfacesFile)
         jsonFile = open(robotParamsFileName)
-        #jsonDir = robotParamsFileName.split('//')
-        #jsonDir = jsonFile.name.split('.json')[0]
-        #jsonPath = jsonDir
-
-        #if not os.path.isdir(jsonPath):
-        #    try:
-        #        os.mkdir(jsonPath)
-        #    except OSError:
-        #        print ("Creation of the directory %s failed" % jsonPath)
-        #    else:
-        #        print ("Successfully created the directory %s " % jsonPath)
 
         data = json.load(jsonFile)
 
@@ -230,17 +265,19 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
     csvSurfacesFile.close()
     return i,numRobots
 
-#def main(argv):
-#    if(len(argv)<4):
-#        print("error in input")
-#        return
-#    panelWidth = argv[3]        #hard coded
-#    numRows,numRobots= parseLines(argv[1],argv[2],argv[3])
-#    print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
+#dir_path = os.path.dirname(os.path.realpath(jsonFile))
+def createBinFiles(theDir):
+    
+    #FNULL = open(os.devnull, 'w')    #use this if you want to suppress output to stdout from the subprocess
+    #filename = "my_file.dat"
+    args = "C:\\Users\\user\\source\\utils\\parameters_by_segment_csv\\BinGenerator\\BinGenerator.exe -d " + "C:\\Users\\user\\source\\utils\\parameters_by_segment_csv\\V1.30.24_P1.125"
+    subprocess.call(args)#, stdout=FNULL, stderr=FNULL, shell=False)
+
 
 def main(argv):
     if((len(argv)<1) or (not os.path.isdir(argv[1]))):
         return
+    #createBinFiles(argv[1])###########################
     theDir = argv[1]
     csvFileName = theDir+'\\SurfaceMap.csv'
     jsonFileName = theDir +'\\versionJson.json'
@@ -250,6 +287,7 @@ def main(argv):
 
 
     numRows,numRobots= parseLines(csvFileName,jsonFileName,VersionName,theDir)
+    #createBinFiles(theDir)
     print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
 
 if __name__=="__main__":

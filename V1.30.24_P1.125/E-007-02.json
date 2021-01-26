@@ -13,10 +13,10 @@
 {
 "length": 1050,
 "width": 900,
-"east": 2320,
+"east": 2020,
 "west": 1620,
 "id": 1,
-"type": 1
+"type": 0
 },
 {
 "length": 45000,
@@ -45,7 +45,7 @@
 {
 "length": 820,
 "width": 600,
-"east": 2020,
+"east": 2320,
 "west": 1620,
 "id": 5,
 "type": 3
@@ -77,7 +77,7 @@
 {
 "length": 820,
 "width": 600,
-"east": 2020,
+"east": 2320,
 "west": 1620,
 "id": 9,
 "type": 0
@@ -93,7 +93,7 @@
 {
 "length": 640,
 "width": 600,
-"east": 2020,
+"east": 2320,
 "west": 1620,
 "id": 11,
 "type": 0
@@ -109,7 +109,7 @@
 {
 "length": 820,
 "width": 600,
-"east": 2020,
+"east": 2320,
 "west": 1620,
 "id": 13,
 "type": 0
@@ -125,7 +125,7 @@
 {
 "length": 640,
 "width": 600,
-"east": 2020,
+"east": 2320,
 "west": 1620,
 "id": 15,
 "type": 0
@@ -232,7 +232,7 @@
 "time_change_parking_absolute_west": 3600,
 "time_change_parking_absolute_east": 60,
 "time_change_parking_out_of_bounds": 60,
-"time_change_parking_reset_fsm": 1000,
+"time_change_parking_reset_fsm": 500,
 "time_between_angle_change_measurements": 1000,
 "angle_change_measurement_threshold": 150,
 "distance_backward_at_line_end": 650,
@@ -269,9 +269,9 @@
 "movement_start_max_duty_duration_msec": 25,
 "leave_parking_single_wheel_turn_angle": 3000,
 "leave_parking_turn_angle_before_bridge_crossing": 18000,
-"enter_parking_turn_angle_before_collision": 2250,
+"enter_parking_turn_angle_before_collision": 2000,
 "direction_deviation_angle_inner_movement": 2500,
-"direction_deviation_angle_edge_movement": 1600,
+"direction_deviation_angle_edge_movement": 2500,
 "direction_deviation_after_calibration": 3500,
 "edge_cleaning_surface_detection_angle": 1000,
 "edge_movement_turn_before_reverse_angle": 2200,
@@ -319,7 +319,7 @@
 "stop_faulty_harness": 0,
 "detect_faulty_harness": 0,
 "enterParkingPositionByParam": 0,
-"enableParkingErrorDetection": 0,
+"enableParkingErrorDetection": 1,
 "wrongCleaningSide": 1,
 "manufactoryID": "00610456",
 "ProtocolVersion": {
