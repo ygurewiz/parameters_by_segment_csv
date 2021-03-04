@@ -12,7 +12,7 @@
     <Name>parameters_by_segment_csv</Name>
     <RootNamespace>parameters_by_segment_csv</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Users\user\source\utils\parameters_by_segment_csv\Revivim_V1.30.24_P1.125"</CommandLineArguments>
+    <CommandLineArguments>"C:\Users\user\source\utils\parameters_by_segment_csv\Revivim_V1.30.28_P1.126"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -105,7 +105,7 @@ def createJsonData(data,robotSegmentsList):
                 surfaceJsonData[i]['length']=int(float(surfaceDict['length(M)'])*1000)
 
 
-                if(surfaceDict["Entity"]=='Dock'):
+                if(surfaceDict["Entity"]=='Docking'):
                     if(surfaceDict['parking_type']=='Central'):
                         data["parking_type"]=1
                     elif(surfaceDict['parking_type']=='Edge'):
