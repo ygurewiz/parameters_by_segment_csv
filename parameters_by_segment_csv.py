@@ -220,6 +220,10 @@ def createJsonData2(data,robotSegmentsList,panelWidth):
 def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
     i=0
     numRobots = 0
+    surfaceCSVfileName = csvSurfacesFileName.split('.csv')[0] +'_Surface_Per_Robot.csv'
+    surfaceCSVfile = open(surfaceCSVfileName,'w')
+    surfaceCSVfile.write('Row,numNorthSegments,numSouthSegments,parkingType\n')
+
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
         csvReader = csv.DictReader(csvSurfacesFile)
         jsonFile = open(robotParamsFileName)
@@ -231,6 +235,7 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
         robotSegmentsList = list()
         doneList = robotSegmentsList
         doneRobot = currentRobot
+
         for line in csvReader:
             i+=1
             if(newRobot):
@@ -238,6 +243,7 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
                 newRobot = False
                 robotSegmentsList.append(line)
                 print(currentRobot)
+                
             else:
                 if(not line['Row']==currentRobot):
                     if(line['Row']==''):
@@ -246,6 +252,8 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
                     currentRobot = line['Row']
                     newRobot = True
                     doneList = robotSegmentsList
+                    if(len(robotSegmentsList)>0):
+                        addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList)
                     robotSegmentsList = list()
                     numRobots+=1
 
@@ -254,15 +262,46 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
                     newJsonFile.close()
                 
                 robotSegmentsList.append(line)
+        if(len(robotSegmentsList)>0):
+            addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList)
+    
+                
         newJsonFile = open(jsonPath+'\\'+currentRobot+'.json','+w')
         createJsonFileLines(robotSegmentsList,data,newJsonFile)
         newJsonFile.close()
-
-        
+    
+    
 
     jsonFile.close()
     csvSurfacesFile.close()
     return i,numRobots
+
+def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
+    
+    numNorthSegments = 0
+    numSouthSegments = 0
+    currentRobot = robotSegmentsList[0]['Row']
+    isNorth = True
+    isSouth = False
+    dockingType = ''
+    for line in robotSegmentsList:
+
+        if(isNorth):
+            if(line['Entity']=='Tracker'):
+                numNorthSegments = numNorthSegments+1
+            elif(line['Entity']=='Docking'):
+                isSouth = True
+                isNorth = False
+                dockingType = line['parking_type']
+        elif(isSouth):
+            if(line['Entity']=='Tracker'):
+                numSouthSegments = numSouthSegments+1
+    if(dockingType == ''):
+        print('t')
+    theLine = '{0},{1},{2},{3}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType)
+    surfaceCSVfile.write(theLine)
+    surfaceCSVfile.write('\n')
+                
 
 #dir_path = os.path.dirname(os.path.realpath(jsonFile))
 def createBinFiles(theDir):
