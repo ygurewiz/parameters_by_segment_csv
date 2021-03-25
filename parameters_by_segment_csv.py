@@ -93,11 +93,17 @@ def createJsonData(data,robotSegmentsList):
             res[param]=[]
             surfaceJsonData = data[param]
             p = len(robotSegmentsList)
+            last = True
             for i in range(len(surfaceJsonData)):
                 if(i>len(robotSegmentsList)-1):
+                    if(last):
+                        surfaceJsonData[i]['type']=3
+                        surfaceJsonData[i]['width']=600 ####protect from invalid
+                        last = False
+                    else:
                         surfaceJsonData[i]['type']=0        
-                        res[param].append(surfaceJsonData[i])
-                        continue
+                    res[param].append(surfaceJsonData[i])
+                    continue
                 surfaceDict = robotSegmentsList[i]
 
                 surfaceJsonData[i]['width']=int(float(surfaceDict['width(M)'])*1000)
@@ -140,11 +146,17 @@ def createJsonData2(data,robotSegmentsList,panelWidth):
             res[param]=[]
             surfaceJsonData = data[param]
             p = len(robotSegmentsList)
+            last = True
             for i in range(len(surfaceJsonData)):
                 if(i>len(robotSegmentsList)-1):
+                    if(last):
+                        surfaceJsonData[i]['type']=3
+                        surfaceJsonData[i]['width']=600 ####protect from invalid
+                        last = False
+                    else:
                         surfaceJsonData[i]['type']=0        
                         res[param].append(surfaceJsonData[i])
-                        continue
+                    continue
                 surfaceDict = robotSegmentsList[i]
 
                 if(surfaceDict["Entity"]=='Tracker'):
