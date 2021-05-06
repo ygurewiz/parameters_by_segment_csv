@@ -93,13 +93,19 @@ def createJsonData(data,robotSegmentsList):
             res[param]=[]
             surfaceJsonData = data[param]
             p = len(robotSegmentsList)
-            last = True
+            last = 1
             for i in range(len(surfaceJsonData)):
                 if(i>len(robotSegmentsList)-1):
-                    if(last):
+                    if(last==1):
                         surfaceJsonData[i]['type']=3
                         surfaceJsonData[i]['width']=600 ####protect from invalid
-                        last = False
+                        surfaceJsonData[i]['length']=900 ####protect from invalid
+                        last = last+1
+                    elif(last==2):
+                        surfaceJsonData[i]['type']=2
+                        surfaceJsonData[i]['width']=3920 ####protect from invalid
+                        surfaceJsonData[i]['length']=45000 ####protect from invalid
+                        last = 0
                     else:
                         surfaceJsonData[i]['type']=0        
                     res[param].append(surfaceJsonData[i])
@@ -114,10 +120,14 @@ def createJsonData(data,robotSegmentsList):
                 if(surfaceDict["Entity"]=='Docking'):
                     if(surfaceDict['parking_type']=='Central'):
                         data["parking_type"]=1
+                        data["distance_reverse_after_wall_collision"] = 45 #################### HARD CODED
+                        data["enter_parking_turn_angle_before_collision"] = 1500 #################### HARD CODED
                     elif(surfaceDict['parking_type']=='Edge'):
                         data["parking_type"]=1
                     elif(surfaceDict['parking_type']=='Revivim'):
                         data["parking_type"]=4
+                        data["distance_reverse_after_wall_collision"] = 170 #################### HARD CODED
+                        data["enter_parking_turn_angle_before_collision"] = 7500 #################### HARD CODED
 
                     if(surfaceDict['parking_side']=='South'):
                         data["parking_side"]=0
@@ -138,10 +148,11 @@ def createJsonData(data,robotSegmentsList):
             #print(param)
     return res
     
-
+#unused!!
 def createJsonData2(data,robotSegmentsList,panelWidth):
     res = {}
     for param in data:
+        print(i)
         if(param=='surface_map'):
             res[param]=[]
             surfaceJsonData = data[param]
