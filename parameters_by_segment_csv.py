@@ -120,14 +120,14 @@ def createJsonData(data,robotSegmentsList):
                 if(surfaceDict["Entity"]=='Docking'):
                     if(surfaceDict['parking_type']=='Central'):
                         data["parking_type"]=1
-                        data["distance_reverse_after_wall_collision"] = 45 #################### HARD CODED
-                        data["enter_parking_turn_angle_before_collision"] = 1500 #################### HARD CODED
+                        #data["distance_reverse_after_wall_collision"] = 45 #################### HARD CODED
+                        #data["enter_parking_turn_angle_before_collision"] = 1500 #################### HARD CODED
                     elif(surfaceDict['parking_type']=='Edge'):
                         data["parking_type"]=1
                     elif(surfaceDict['parking_type']=='Revivim'):
                         data["parking_type"]=4
-                        data["distance_reverse_after_wall_collision"] = 170 #################### HARD CODED
-                        data["enter_parking_turn_angle_before_collision"] = 7500 #################### HARD CODED
+                        #data["distance_reverse_after_wall_collision"] = 170 #################### HARD CODED
+                        #data["enter_parking_turn_angle_before_collision"] = 7500 #################### HARD CODED
 
                     if(surfaceDict['parking_side']=='South'):
                         data["parking_side"]=0
