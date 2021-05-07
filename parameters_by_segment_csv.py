@@ -25,7 +25,7 @@ def createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList):
         for p in paramData:
             if(p =='Row'):
                 continue
-            res[p] = [paramData[p]] 
+            res[p] = [int(paramData[p])] 
 
     addLineToJson(True,'{\n',res,newJsonFile,False)
     length = 0
