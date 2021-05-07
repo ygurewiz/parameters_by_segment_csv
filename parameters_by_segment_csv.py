@@ -6,19 +6,26 @@ import string
 import os
 import subprocess
 
-def createJsonFileLines(robotSegmentsList,data,newJsonFile):
+
+def createParmeterChangeList(csvParametersReader):
+    data = {}
+    for row in csvParametersReader:
+        robot = row['Row']
+        data[robot] = row
+    return data
+
+def createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList):
 
     res = createJsonData(data,robotSegmentsList)
     parking_type = data['parking_type']
+    robotName = robotSegmentsList[0]['Row']
 
-    if(parking_type==4 or parking_type==2):
-        res["distance_reverse_after_wall_collision"] = [170] #################### HARD CODED
-        res["enter_parking_turn_angle_before_collision"] = [7500] #################### HARD CODED
-    elif(parking_type==1):
-        res["distance_reverse_after_wall_collision"] = [45] #################### HARD CODED
-        res["enter_parking_turn_angle_before_collision"] = [1500] #################### HARD CODED
-    else:
-        print('ooo')
+    if(not parameterChangeList==[]):
+        paramData = parameterChangeList[robotName]
+        for p in paramData:
+            if(p =='Row'):
+                continue
+            res[p] = [paramData[p]] 
 
     addLineToJson(True,'{\n',res,newJsonFile,False)
     length = 0
@@ -246,7 +253,7 @@ def createJsonData2(data,robotSegmentsList,panelWidth):
             #print(param)
     return res
 
-def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
+def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,parameterFixFileName):
     i=0
     numRobots = 0
     surfaceCSVfileName = csvSurfacesFileName.split('.csv')[0] +'_Surface_Per_Robot.csv'
@@ -256,7 +263,18 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
         csvReader = csv.DictReader(csvSurfacesFile)
         jsonFile = open(robotParamsFileName)
+        try:
+            parameterFixFile = open(parameterFixFileName)
+            csvParametersReader = csv.DictReader(parameterFixFile)
+            parameterChangeList = createParmeterChangeList(csvParametersReader)
+            parameterFixFile.close()
 
+        except:
+            print(sys.exc_info()[0])
+            parameterChangeList = []
+
+
+        
         data = json.load(jsonFile)
 
         currentRobot = ''
@@ -287,7 +305,7 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
                     numRobots+=1
 
                     newJsonFile = open(jsonPath+'\\'+doneRobot+'.json','+w')
-                    createJsonFileLines(doneList,data,newJsonFile)
+                    createJsonFileLines(doneList,data,newJsonFile,parameterChangeList)
                     newJsonFile.close()
                 
                 robotSegmentsList.append(line)
@@ -296,11 +314,10 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
     
                 
         newJsonFile = open(jsonPath+'\\'+currentRobot+'.json','+w')
-        createJsonFileLines(robotSegmentsList,data,newJsonFile)
+        createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList)
         newJsonFile.close()
     
     
-
     jsonFile.close()
     csvSurfacesFile.close()
     return i,numRobots
@@ -359,12 +376,13 @@ def main(argv):
     theDir = argv[1]
     csvFileName = theDir+'\\SurfaceMap.csv'
     jsonFileName = theDir +'\\versionJson.json'
+    parameterFixFileName = theDir +'\\parameterChanges.csv'
     
     VersionNameStr =theDir.split('\\')
     VersionName = VersionNameStr[len(VersionNameStr)-1]
 
 
-    numRows,numRobots= parseLines(csvFileName,jsonFileName,VersionName,theDir)
+    numRows,numRobots= parseLines(csvFileName,jsonFileName,VersionName,theDir,parameterFixFileName)
     #createBinFiles(theDir)
     print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
 
