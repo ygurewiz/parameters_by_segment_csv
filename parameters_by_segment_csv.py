@@ -9,6 +9,16 @@ import subprocess
 def createJsonFileLines(robotSegmentsList,data,newJsonFile):
 
     res = createJsonData(data,robotSegmentsList)
+    parking_type = data['parking_type']
+
+    if(parking_type==4 or parking_type==2):
+        res["distance_reverse_after_wall_collision"] = [170] #################### HARD CODED
+        res["enter_parking_turn_angle_before_collision"] = [7500] #################### HARD CODED
+    elif(parking_type==1):
+        res["distance_reverse_after_wall_collision"] = [45] #################### HARD CODED
+        res["enter_parking_turn_angle_before_collision"] = [1500] #################### HARD CODED
+    else:
+        print('ooo')
 
     addLineToJson(True,'{\n',res,newJsonFile,False)
     length = 0
@@ -20,8 +30,8 @@ def createJsonFileLines(robotSegmentsList,data,newJsonFile):
             addLineToJson(False,headToken,res,newJsonFile,True)
         else:
             addLineToJson(False,headToken,res,newJsonFile,False)
-        #if(not length==p):
-         #   newJsonFile.write(',')
+        #if(headToken=='distance_reverse_after_wall_collision'):
+         #   print('t')
     addLineToJson(True,'}\n',res,newJsonFile,True)
  
     
@@ -120,14 +130,10 @@ def createJsonData(data,robotSegmentsList):
                 if(surfaceDict["Entity"]=='Docking'):
                     if(surfaceDict['parking_type']=='Central'):
                         data["parking_type"]=1
-                        #data["distance_reverse_after_wall_collision"] = 45 #################### HARD CODED
-                        #data["enter_parking_turn_angle_before_collision"] = 1500 #################### HARD CODED
                     elif(surfaceDict['parking_type']=='Edge'):
                         data["parking_type"]=1
                     elif(surfaceDict['parking_type']=='Revivim'):
                         data["parking_type"]=4
-                        #data["distance_reverse_after_wall_collision"] = 170 #################### HARD CODED
-                        #data["enter_parking_turn_angle_before_collision"] = 7500 #################### HARD CODED
 
                     if(surfaceDict['parking_side']=='South'):
                         data["parking_side"]=0
@@ -245,7 +251,7 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath):
     numRobots = 0
     surfaceCSVfileName = csvSurfacesFileName.split('.csv')[0] +'_Surface_Per_Robot.csv'
     surfaceCSVfile = open(surfaceCSVfileName,'w')
-    surfaceCSVfile.write('Row,numNorthSegments,numSouthSegments,parkingType\n')
+    surfaceCSVfile.write('Row,numNorthSegments,numSouthSegments,parkingType,parkingSide\n')
 
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
         csvReader = csv.DictReader(csvSurfacesFile)
@@ -316,12 +322,23 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
                 isSouth = True
                 isNorth = False
                 dockingType = line['parking_type']
+                dockingSide = line['parking_side']
         elif(isSouth):
             if(line['Entity']=='Tracker'):
                 numSouthSegments = numSouthSegments+1
     if(dockingType == ''):
         print('t')
-    theLine = '{0},{1},{2},{3}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType)
+    if(dockingType=='Revivim' or dockingType=='Edge'):
+        if(dockingSide=='North'):
+            theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide)
+        elif(dockingSide=='South'):
+            theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numSouthSegments,numNorthSegments,dockingType,dockingSide)
+        else:
+            print('oi')
+    elif(dockingType=='Central'):
+        theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide)
+    else:
+        print('oioi')
     surfaceCSVfile.write(theLine)
     surfaceCSVfile.write('\n')
                 
