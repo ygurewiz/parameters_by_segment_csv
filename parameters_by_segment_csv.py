@@ -141,6 +141,8 @@ def createJsonData(data,robotSegmentsList):
                         data["parking_type"]=1
                     elif(surfaceDict['parking_type']=='Revivim'):
                         data["parking_type"]=4
+                    elif(surfaceDict['parking_type']=='CA'):
+                        data["parking_type"]=2
 
                     if(surfaceDict['parking_side']=='South'):
                         data["parking_side"]=0
@@ -345,7 +347,7 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
                 numSouthSegments = numSouthSegments+1
     if(dockingType == ''):
         print('t')
-    if(dockingType=='Revivim' or dockingType=='Edge'):
+    if(dockingType=='Revivim' or dockingType=='Edge' or dockingType=='CA'):
         if(dockingSide=='North'):
             theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide)
         elif(dockingSide=='South'):
