@@ -1,7 +1,7 @@
 import sys
 import csv
 import json
-import str
+import string
 import string
 import os
 import subprocess
@@ -16,7 +16,7 @@ def createParmeterChangeList(csvParametersReader):
 
 def createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList):
 
-    res = createJsonData(data,robotSegmentsList)
+    res,surfaceJsonForServer = createJsonData(data,robotSegmentsList)           ##############################surfaceJsonForServer
     parking_type = data['parking_type']
     robotName = robotSegmentsList[0]['Row']
 
@@ -40,6 +40,7 @@ def createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList):
         #if(headToken=='distance_reverse_after_wall_collision'):
          #   print('t')
     addLineToJson(True,'}\n',res,newJsonFile,True)
+    return surfaceJsonForServer         ##############################surfaceJsonForServer
  
     
 
@@ -103,8 +104,19 @@ def addLineToJson(istoken,headToken,res,newJsonFile,islast):
     else:
         print(headToken)
 
+
+
+def getsurfaceJsonData(surfaceJsonData):
+    res = []
+    for p in surfaceJsonData:
+        if p['type']==0:
+            break
+        res.append(p)
+    return res
+
 def createJsonData(data,robotSegmentsList):
     res = {}
+    surfaceJsonForServer = []            ##############################surfaceJsonForServer
     for param in data:
         if(param=='surface_map'):
             res[param]=[]
@@ -156,111 +168,24 @@ def createJsonData(data,robotSegmentsList):
                     surfaceJsonData[i]['length']=gap*10
 
                 res[param].append(surfaceJsonData[i])  
-                #print(param)
+                
+                surfaceJsonForServer = getsurfaceJsonData(surfaceJsonData[:p])              ##############################surfaceJsonForServer
+                #print(surfaceJsonForServer)                              ##############################surfaceJsonForServer
         else:
             res[param]=[]
             res[param].append(data[param])
             #print(param)
-    return res
+    return res,surfaceJsonForServer
     
-#unused!!
-def createJsonData2(data,robotSegmentsList,panelWidth):
-    res = {}
-    for param in data:
-        print(i)
-        if(param=='surface_map'):
-            res[param]=[]
-            surfaceJsonData = data[param]
-            p = len(robotSegmentsList)
-            last = True
-            for i in range(len(surfaceJsonData)):
-                if(i>len(robotSegmentsList)-1):
-                    if(last):
-                        surfaceJsonData[i]['type']=3
-                        surfaceJsonData[i]['width']=600 ####protect from invalid
-                        last = False
-                    else:
-                        surfaceJsonData[i]['type']=0        
-                        res[param].append(surfaceJsonData[i])
-                    continue
-                surfaceDict = robotSegmentsList[i]
-
-                if(surfaceDict["Entity"]=='Tracker'):
-                    surfaceJsonData[i]['type']=2
-                    surfaceJsonData[i]['length']=int(int(surfaceDict['Area'])*1000/int(panelWidth))
-                    surfaceJsonData[i]['width']=3920         #hard coded!
-                    surfaceJsonData[i]['east']=2320         #hard coded!
-
-                elif(surfaceDict["Entity"]=='Bridge'):
-                    surfaceJsonData[i]['type']=3
-                    surfaceJsonData[i]['width']=600         #hard coded!
-                    surfaceJsonData[i]['east']=2020         #hard coded!
-                    if('-' in surfaceDict['Gap']):
-                        gaps = surfaceDict['Gap'].split('-')
-                        gap = max(int(gaps[0]),int(gaps[1]))
-                        surfaceJsonData[i]['length']=gap*10
-                    elif('<' in surfaceDict['Gap']):
-                        gaps = surfaceDict['Gap'].split('<')
-                        gap = int(gaps[1])
-                        surfaceJsonData[i]['length']=gap*10
-                    elif('>' in surfaceDict['Gap']):
-                        gaps = surfaceDict['Gap'].split('>')
-                        gap = int(gaps[1])
-                        surfaceJsonData[i]['length']=gap*10
-                    else:
-                        print("NOOO!!")
-
-                elif(surfaceDict["Entity"]=='Dock'):
-                    surfaceJsonData[i]['type']=1
-                    surfaceJsonData[i]['width']=900              #hard coded!
-                    surfaceJsonData[i]['east']=2320             #hard coded!
-                    data["parking_side"]=0
-                    if(surfaceDict['Gap']=='Edge'):
-                        data["parking_type"]=1                  #edge table
-                        surfaceJsonData[i]['length']=750
-                        parkingType = surfaceDict['Row'].split('-')[2]
-                        if(parkingType=='01'):
-                            data["parking_side"]=1
-                        elif(parkingType=='02' or parkingType=='03'):
-                            data["parking_side"]=0
-                        else:
-                            print("NOOO!!")
-                    else:
-                        if('-' in surfaceDict['Gap']):
-                            gaps = surfaceDict['Gap'].split('-')
-                            gap = max(int(gaps[0]),int(gaps[1]))
-                            surfaceJsonData[i]['length']=gap*10
-                        elif('<' in surfaceDict['Gap']):
-                            gaps = surfaceDict['Gap'].split('<')
-                            gap = int(gaps[1])
-                            surfaceJsonData[i]['length']=gap*10
-                        elif('>' in surfaceDict['Gap']):
-                            gaps = surfaceDict['Gap'].split('>')
-                            gap = int(gaps[1])
-                            surfaceJsonData[i]['length']=gap*10
-                        else:
-                            print("NOOO!!")
-
-                elif(surfaceDict["Entity"]=='Gap'):
-                    surfaceJsonData[i]['type']=0
-                    gaps = surfaceDict['Gap'].split('-')
-                    gap = max(int(gaps[0]),int(gaps[1]))
-                    surfaceJsonData[i]['length']=gap*10
-
-                res[param].append(surfaceJsonData[i])  
-                #print(param)
-        else:
-            res[param]=[]
-            res[param].append(data[param])
-            #print(param)
-    return res
 
 def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,parameterFixFileName):
     i=0
     numRobots = 0
     surfaceCSVfileName = csvSurfacesFileName.split('.csv')[0] +'_Surface_Per_Robot.csv'
     surfaceCSVfile = open(surfaceCSVfileName,'w')
-    surfaceCSVfile.write('Row,numNorthSegments,numSouthSegments,parkingType,parkingSide\n')
+    surfaceCSVfile.write('Row,numNorthSegments,numSouthSegments,parkingType,parkingSide,surfaceJsonForServer\n')
+    fieldNames = ['Row','numNorthSegments','numSouthSegments','parkingType','parkingSide','surfaceJsonForServer']           ####***
+#    csvSurfaceFileWriter = csv.DictWriter(surfaceCSVfile,fieldNames)
 
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
         csvReader = csv.DictReader(csvSurfacesFile)
@@ -285,6 +210,8 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
         doneList = robotSegmentsList
         doneRobot = currentRobot
 
+        surfaceJsonForServerList = []
+
         for line in csvReader:
             i+=1
             if(newRobot):
@@ -307,7 +234,8 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
                     numRobots+=1
 
                     newJsonFile = open(jsonPath+'\\'+doneRobot+'.json','+w')
-                    createJsonFileLines(doneList,data,newJsonFile,parameterChangeList)
+                    surfaceJsonForServer = createJsonFileLines(doneList,data,newJsonFile,parameterChangeList) 
+                    surfaceJsonForServerList.append(doneRobot+'\t'+json.dumps(surfaceJsonForServer)+'\n')
                     newJsonFile.close()
                 
                 robotSegmentsList.append(line)
@@ -316,13 +244,14 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
     
                 
         newJsonFile = open(jsonPath+'\\'+currentRobot+'.json','+w')
-        createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList)
+        surfaceJsonForServer = createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList)
+        surfaceJsonForServerList.append(doneRobot+'\t'+json.dumps(surfaceJsonForServer)+'\n')
         newJsonFile.close()
     
     
     jsonFile.close()
     csvSurfacesFile.close()
-    return i,numRobots
+    return i,numRobots,surfaceJsonForServerList
 
 def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
     
@@ -362,31 +291,28 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
     surfaceCSVfile.write('\n')
                 
 
-#dir_path = os.path.dirname(os.path.realpath(jsonFile))
-def createBinFiles(theDir):
-    
-    #FNULL = open(os.devnull, 'w')    #use this if you want to suppress output to stdout from the subprocess
-    #filename = "my_file.dat"
-    args = "C:\\Users\\user\\source\\utils\\parameters_by_segment_csv\\BinGenerator\\BinGenerator.exe -d " + "C:\\Users\\user\\source\\utils\\parameters_by_segment_csv\\V1.30.24_P1.125"
-    subprocess.call(args)#, stdout=FNULL, stderr=FNULL, shell=False)
+
 
 
 def main(argv):
     if((len(argv)<1) or (not os.path.isdir(argv[1]))):
         return
-    #createBinFiles(argv[1])###########################
     theDir = argv[1]
     csvFileName = theDir+'\\SurfaceMap.csv'
     jsonFileName = theDir +'\\versionJson.json'
     parameterFixFileName = theDir +'\\parameterChanges.csv'
+    surfaceMapJsonsForServer = theDir + '\\surfaceMapJsonsForServer.txt'
+    surfaceMapJsonsForServerFile = open(surfaceMapJsonsForServer,'w')
     
     VersionNameStr =theDir.split('\\')
     VersionName = VersionNameStr[len(VersionNameStr)-1]
 
 
-    numRows,numRobots= parseLines(csvFileName,jsonFileName,VersionName,theDir,parameterFixFileName)
-    #createBinFiles(theDir)
+    numRows,numRobots,surfaceJsonForServerList= parseLines(csvFileName,jsonFileName,VersionName,theDir,parameterFixFileName)
     print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
+    
+    for t in surfaceJsonForServerList:
+        surfaceMapJsonsForServerFile.write(t)
 
 if __name__=="__main__":
     main(sys.argv)

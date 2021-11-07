@@ -12,7 +12,7 @@
     <Name>parameters_by_segment_csv</Name>
     <RootNamespace>parameters_by_segment_csv</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Users\user\Ecoppia\V&amp;V and FE Team - Documents\Deployment Projects\Israel\T4 Revivim\Upgrade\New Revivim - Parameters\20210713 - v.1.3.37_P200"</CommandLineArguments>
+    <CommandLineArguments>"C:\Users\user\source\repos\ygurewiz\parameters_by_segment_csv\20211031 - v.1.38.52_P236"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
