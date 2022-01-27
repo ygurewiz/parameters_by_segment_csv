@@ -191,8 +191,8 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
     numRobots = 0
     surfaceCSVfileName = csvSurfacesFileName.split('.csv')[0] +'_Surface_Per_Robot.csv'
     surfaceCSVfile = open(surfaceCSVfileName,'w')
-    surfaceCSVfile.write('Row,numNorthSegments,numSouthSegments,parkingType,parkingSide,surfaceJsonForServer\n')
-    fieldNames = ['Row','numNorthSegments','numSouthSegments','parkingType','parkingSide','surfaceJsonForServer']           ####***
+    surfaceCSVfile.write('Row,numNorthSegments,numSouthSegments,parkingType,parkingSide,areaRowN,areaRowS,numSequencesN,numSequencesS\n')
+    #fieldNames = ['Row','numNorthSegments','numSouthSegments','parkingType','parkingSide','areaRowN','areaRowS']           ####***
 #    csvSurfaceFileWriter = csv.DictWriter(surfaceCSVfile,fieldNames)
 
     with  open(csvSurfacesFileName, newline='') as csvSurfacesFile:
@@ -269,11 +269,19 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
     isNorth = True
     isSouth = False
     dockingType = ''
+    lengthRowN=0
+    lengthRowS=0
+    widthSegment = 0
+    numStrips = 0
+
     for line in robotSegmentsList:
 
         if(isNorth):
             if(line['Entity']=='Tracker'):
                 numNorthSegments = numNorthSegments+1
+                lengthRowN = lengthRowN+float(line['length(M)'])
+                if widthSegment==0:
+                    widthSegment = float(line['width(M)'])
             elif(line['Entity']=='Docking'):
                 isSouth = True
                 isNorth = False
@@ -282,19 +290,35 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
         elif(isSouth):
             if(line['Entity']=='Tracker'):
                 numSouthSegments = numSouthSegments+1
-    if(dockingType == ''):
-        print('t')
-    if(dockingType=='Revivim' or dockingType=='Edge' or dockingType=='CA'):
-        if(dockingSide=='North'):
-            theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide)
-        elif(dockingSide=='South'):
-            theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numSouthSegments,numNorthSegments,dockingType,dockingSide)
-        else:
-            print('oi')
-    elif(dockingType=='Central' or dockingType=='Nadec'):
-        theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide)
+                lengthRowS = lengthRowS+float(line['length(M)'])
+
+    wholeWidth = round(widthSegment,0)
+    if wholeWidth==4:
+        numStrips = 12
+    elif wholeWidth==2:
+        numStrips=6
     else:
-        print('oioi')
+        print('UNKNOWN_WIDTH_ERROR')
+
+    rowAreaN = round(lengthRowN*widthSegment,0)
+    rowAreaS = round(lengthRowS*widthSegment,0)
+
+    numSequencesN = numNorthSegments*numStrips
+    numSequencesS = numSouthSegments*numStrips
+
+    if(dockingType == ''):
+        print('DockingType INVALID')
+    elif(dockingType=='Revivim' or dockingType=='Edge' or dockingType=='CA'):
+        if(dockingSide=='North'):
+            theLine = '{0},{1},{2},{3},{4},{5},{6},{7},{8}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide,rowAreaN,rowAreaS,numSequencesN,numSequencesS)
+        elif(dockingSide=='South'):
+            theLine = '{0},{1},{2},{3},{4},{5},{6},{7},{8}'.format(currentRobot,numSouthSegments,numNorthSegments,dockingType,dockingSide,rowAreaN,rowAreaS,numSequencesN,numSequencesS)
+        else:
+            print('PARSE_ERROR')
+    elif(dockingType=='Central' or dockingType=='Nadec'):
+        theLine = '{0},{1},{2},{3},{4},{5},{6},{7},{8}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide,rowAreaN,rowAreaS,numSequencesN,numSequencesS)
+    else:
+        print('PARSE_ERROR_2')
     surfaceCSVfile.write(theLine)
     surfaceCSVfile.write('\n')
                 
