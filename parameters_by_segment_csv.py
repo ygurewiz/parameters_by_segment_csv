@@ -126,17 +126,22 @@ def createJsonData(data,robotSegmentsList):
             for i in range(len(surfaceJsonData)):
                 if(i>len(robotSegmentsList)-1):
                     if(last==1):
-                        surfaceJsonData[i]['type']=3
-                        surfaceJsonData[i]['width']=600 ####protect from invalid
-                        surfaceJsonData[i]['length']=900 ####protect from invalid
+                        surfaceJsonData[i]['type']=0
+                        surfaceJsonData[i]['width']=0 ####protect from invalid
+                        surfaceJsonData[i]['length']=0 ####protect from invalid
+                        surfaceJsonData[i]['west']=0 ####protect from invalid
                         last = last+1
                     elif(last==2):
-                        surfaceJsonData[i]['type']=2
-                        surfaceJsonData[i]['width']=3920 ####protect from invalid
-                        surfaceJsonData[i]['length']=45000 ####protect from invalid
+                        surfaceJsonData[i]['type']=0
+                        surfaceJsonData[i]['width']=0 ####protect from invalid
+                        surfaceJsonData[i]['length']=0 ####protect from invalid
+                        surfaceJsonData[i]['west']=0 ####protect from invalid
                         last = 0
                     else:
-                        surfaceJsonData[i]['type']=0        
+                        surfaceJsonData[i]['type']=0 
+                        surfaceJsonData[i]['width']=0 
+                        surfaceJsonData[i]['length']=0
+                        surfaceJsonData[i]['west']=0
                     res[param].append(surfaceJsonData[i])
                     continue
                 surfaceDict = robotSegmentsList[i]
@@ -144,6 +149,7 @@ def createJsonData(data,robotSegmentsList):
                 surfaceJsonData[i]['width']=int(float(surfaceDict['width(M)'])*1000)
                 surfaceJsonData[i]['type']=int(surfaceDict['type(B=3,D=1,T=2)'])
                 surfaceJsonData[i]['length']=int(float(surfaceDict['length(M)'])*1000)
+                surfaceJsonData[i]['west']=int(float(surfaceDict['west(BridgeCenter)'])*1000)
 
 
                 if(surfaceDict["Entity"]=='Docking'):
@@ -155,6 +161,8 @@ def createJsonData(data,robotSegmentsList):
                         data["parking_type"]=4
                     elif(surfaceDict['parking_type']=='CA'):
                         data["parking_type"]=2
+                    elif(surfaceDict['parking_type']=='Nadec'):
+                        data["parking_type"]=5
 
                     if(surfaceDict['parking_side']=='South'):
                         data["parking_side"]=0
@@ -283,7 +291,7 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
             theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numSouthSegments,numNorthSegments,dockingType,dockingSide)
         else:
             print('oi')
-    elif(dockingType=='Central'):
+    elif(dockingType=='Central' or dockingType=='Nadec'):
         theLine = '{0},{1},{2},{3},{4}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide)
     else:
         print('oioi')
