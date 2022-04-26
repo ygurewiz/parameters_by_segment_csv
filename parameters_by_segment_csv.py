@@ -130,18 +130,21 @@ def createJsonData(data,robotSegmentsList):
                         surfaceJsonData[i]['width']=0 ####protect from invalid
                         surfaceJsonData[i]['length']=0 ####protect from invalid
                         surfaceJsonData[i]['west']=0 ####protect from invalid
+                        surfaceJsonData[i]['east']=0 ####protect from invalid
                         last = last+1
                     elif(last==2):
                         surfaceJsonData[i]['type']=0
                         surfaceJsonData[i]['width']=0 ####protect from invalid
                         surfaceJsonData[i]['length']=0 ####protect from invalid
                         surfaceJsonData[i]['west']=0 ####protect from invalid
+                        surfaceJsonData[i]['east']=0 ####protect from invalid
                         last = 0
                     else:
                         surfaceJsonData[i]['type']=0 
                         surfaceJsonData[i]['width']=0 
                         surfaceJsonData[i]['length']=0
                         surfaceJsonData[i]['west']=0
+                        surfaceJsonData[i]['east']=0
                     res[param].append(surfaceJsonData[i])
                     continue
                 surfaceDict = robotSegmentsList[i]
@@ -163,6 +166,8 @@ def createJsonData(data,robotSegmentsList):
                         data["parking_type"]=2
                     elif(surfaceDict['parking_type']=='Nadec'):
                         data["parking_type"]=5
+                    elif(surfaceDict['parking_type']=='Nadec_Edge'):
+                        data["parking_type"]=6
 
                     if(surfaceDict['parking_side']=='South'):
                         data["parking_side"]=0
@@ -291,12 +296,15 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
             if(line['Entity']=='Tracker'):
                 numSouthSegments = numSouthSegments+1
                 lengthRowS = lengthRowS+float(line['length(M)'])
-
+                if widthSegment==0:
+                    widthSegment = float(line['width(M)'])
     wholeWidth = round(widthSegment,0)
     if wholeWidth==4:
         numStrips = 12
     elif wholeWidth==2:
         numStrips=6
+    elif wholeWidth==3:
+        numStrips=10
     else:
         print('UNKNOWN_WIDTH_ERROR')
 
@@ -315,7 +323,7 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
             theLine = '{0},{1},{2},{3},{4},{5},{6},{7},{8}'.format(currentRobot,numSouthSegments,numNorthSegments,dockingType,dockingSide,rowAreaN,rowAreaS,numSequencesN,numSequencesS)
         else:
             print('PARSE_ERROR')
-    elif(dockingType=='Central' or dockingType=='Nadec'):
+    elif(dockingType=='Central' or dockingType=='Nadec' or dockingType=='Nadec_Edge'):
         theLine = '{0},{1},{2},{3},{4},{5},{6},{7},{8}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide,rowAreaN,rowAreaS,numSequencesN,numSequencesS)
     else:
         print('PARSE_ERROR_2')
