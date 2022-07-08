@@ -1,3 +1,4 @@
+import random
 import sys
 import csv
 import json
@@ -5,6 +6,7 @@ import string
 import string
 import os
 import subprocess
+import random
 
 
 def createParmeterChangeList(csvParametersReader):
@@ -198,7 +200,7 @@ def createJsonData(data,robotSegmentsList,numNorthSegments):
     
 
 def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,parameterFixFileName):
-    i=0
+    i=1
     numRobots = 0
     surfaceCSVfileName = csvSurfacesFileName.split('.csv')[0] +'_Surface_Per_Robot.csv'
     surfaceCSVfile = open(surfaceCSVfileName,'w')
@@ -232,7 +234,7 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
         surfaceJsonForServerList = []
 
         for line in csvReader:
-            i+=1
+            i=i+1            
             if(newRobot):
                 currentRobot=line['Row']
                 newRobot = False
@@ -256,7 +258,11 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
 
                     newJsonFile = open(jsonPath+'\\'+doneRobot+'.json','+w')
                     surfaceJsonForServer = createJsonFileLines(doneList,data,newJsonFile,parameterChangeList,numNorthSegments) 
-                    surfaceJsonForServerList.append(doneRobot+'\t'+json.dumps(surfaceJsonForServer)+'\n')
+                    l = dict()
+                    l['rowId'] = random.randint(0,255)
+                    l['robot'] = '"'+doneRobot+'"'
+                    l['surface_map'] = json.dumps(surfaceJsonForServer)
+                    surfaceJsonForServerList.append(l)
                     newJsonFile.close()
                 
                 robotSegmentsList.append(line)
@@ -266,7 +272,11 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
                 
         newJsonFile = open(jsonPath+'\\'+currentRobot+'.json','+w')
         surfaceJsonForServer = createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList,numNorthSegments)
-        surfaceJsonForServerList.append(doneRobot+'\t'+json.dumps(surfaceJsonForServer)+'\n')
+        l = dict()
+        l['rowId'] = random.randint(0,255)
+        l['robot'] = '"'+currentRobot+'"'
+        l['surface_map'] = json.dumps(surfaceJsonForServer)
+        surfaceJsonForServerList.append(l)
         newJsonFile.close()
     
     
@@ -353,18 +363,30 @@ def main(argv):
     csvFileName = theDir+'\\SurfaceMap.csv'
     jsonFileName = theDir +'\\versionJson.json'
     parameterFixFileName = theDir +'\\parameterChanges.csv'
-    surfaceMapJsonsForServer = theDir + '\\surfaceMapJsonsForServer.txt'
+    surfaceMapJsonsForServer = theDir + '\\surfaceMapJsonsForServer.json'
     surfaceMapJsonsForServerFile = open(surfaceMapJsonsForServer,'w')
     
     VersionNameStr =theDir.split('\\')
     VersionName = VersionNameStr[len(VersionNameStr)-1]
 
-
-    numRows,numRobots,surfaceJsonForServerList= parseLines(csvFileName,jsonFileName,VersionName,theDir,parameterFixFileName)
+    tempRes = parseLines(csvFileName,jsonFileName,VersionName,theDir,parameterFixFileName)
+     
+    if tempRes==0:
+        print('ERROR_IN_SURFACE_MAP_EXCEL_CSV')
+        return
+    numRows,numRobots,surfaceJsonForServerList = tempRes
     print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
     
     for t in surfaceJsonForServerList:
-        surfaceMapJsonsForServerFile.write(t)
+        ListLength = len(surfaceJsonForServerList)
+        l=0
+        res='{'
+        for j in t:
+            res = res+'"'+str(j)+'": '+str(t[j])
+            if l < ListLength:
+                res = res+','
+        surfaceMapJsonsForServerFile.write(res+'}\n') 
+        l = l+1
 
 if __name__=="__main__":
     main(sys.argv)
