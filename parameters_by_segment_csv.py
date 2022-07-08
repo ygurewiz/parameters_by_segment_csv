@@ -13,19 +13,21 @@ def createParmeterChangeList(csvParametersReader):
     data = {}
     for row in csvParametersReader:
         robot = row['Row']
+        isSeverLengthwise = row['isSeverLengthwise']
         data[robot] = row
+        data['isSeverLengthwise'] = isSeverLengthwise
     return data
 
 def createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList,numNorthSegments):
 
-    res,surfaceJsonForServer = createJsonData(data,robotSegmentsList,numNorthSegments)           ##############################surfaceJsonForServer
     parking_type = data['parking_type']
     robotName = robotSegmentsList[0]['Row']
+    res,surfaceJsonForServer = createJsonData(data,robotSegmentsList,numNorthSegments,parameterChangeList[robotName]['isSeverLengthwise'])           ##############################surfaceJsonForServer
 
     if(not parameterChangeList==[]):
         paramData = parameterChangeList[robotName] 
         for p in paramData:
-            if(p =='Row'):
+            if (p =='Row') or (p=='isSeverLengthwise'):
                 continue
             res[p] = [int(paramData[p])] 
 
@@ -116,8 +118,12 @@ def getsurfaceJsonData(surfaceJsonData):
         res.append(p)
     return res
 
-def createJsonData(data,robotSegmentsList,numNorthSegments):
+def createJsonData(data,robotSegmentsList,numNorthSegments,isSeverLengthwise):
     res = {}
+    if isSeverLengthwise=='TRUE':
+        allignment = True
+    else:
+        allignment = False
     surfaceJsonForServer = []            ##############################surfaceJsonForServer
     numSegments = 0
     for param in data:
@@ -128,7 +134,8 @@ def createJsonData(data,robotSegmentsList,numNorthSegments):
             last = 1
             for i in range(len(surfaceJsonData)):
                 if(i>len(robotSegmentsList)-1):
-                    surfaceJsonData[i]['allignment'] = 1
+                    if allignment:
+                        surfaceJsonData[i]['allignment'] = 1
                     if(last==1):
                         surfaceJsonData[i]['type']=0
                         #surfaceJsonData[i]['width']=0 ####protect from invalid
@@ -147,13 +154,16 @@ def createJsonData(data,robotSegmentsList,numNorthSegments):
                     continue
                 surfaceDict = robotSegmentsList[i]
                 if(numSegments<numNorthSegments):
-                    surfaceJsonData[i]['allignment'] = 0
+                    if allignment:
+                        surfaceJsonData[i]['allignment'] = 0
                     if surfaceJsonData[i]['type']==2:
                         numSegments=numSegments+1
                 elif surfaceJsonData[i]['type']==1:
-                    surfaceJsonData[i]['allignment'] = 0
+                    if allignment:
+                        surfaceJsonData[i]['allignment'] = 0
                 else:
-                    surfaceJsonData[i]['allignment'] = 1
+                    if allignment:
+                        surfaceJsonData[i]['allignment'] = 1
                 
 
                 surfaceJsonData[i]['width']=int(float(surfaceDict['width(M)'])*1000)
