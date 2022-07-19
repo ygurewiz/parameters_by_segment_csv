@@ -269,9 +269,9 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
                     newJsonFile = open(jsonPath+'\\'+doneRobot+'.json','+w')
                     surfaceJsonForServer = createJsonFileLines(doneList,data,newJsonFile,parameterChangeList,numNorthSegments) 
                     l = dict()
-                    l['rowId'] = random.randint(0,255)
-                    l['robot'] = '"'+doneRobot+'"'
-                    l['surface_map'] = json.dumps(surfaceJsonForServer)
+                    l['configurationKey'] = random.randint(1,254)
+                    l['robotId'] = '"'+doneRobot+'"'
+                    l['surfaceMap'] = json.dumps(surfaceJsonForServer)
                     surfaceJsonForServerList.append(l)
                     newJsonFile.close()
                 
@@ -283,9 +283,9 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
         newJsonFile = open(jsonPath+'\\'+currentRobot+'.json','+w')
         surfaceJsonForServer = createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList,numNorthSegments)
         l = dict()
-        l['rowId'] = random.randint(0,255)
-        l['robot'] = '"'+currentRobot+'"'
-        l['surface_map'] = json.dumps(surfaceJsonForServer)
+        l['configurationKey'] = random.randint(1,254)
+        l['robotId'] = '"'+currentRobot+'"'
+        l['surfaceMap'] = json.dumps(surfaceJsonForServer)
         surfaceJsonForServerList.append(l)
         newJsonFile.close()
     
