@@ -270,7 +270,7 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
                     surfaceJsonForServer = createJsonFileLines(doneList,data,newJsonFile,parameterChangeList,numNorthSegments) 
                     l = dict()
                     l['configurationKey'] = random.randint(1,254)
-                    l['robotId'] = '"'+doneRobot+'"'
+                    l['assetId'] = '"'+doneRobot+'"'
                     l['surfaceMap'] = json.dumps(surfaceJsonForServer)
                     surfaceJsonForServerList.append(l)
                     newJsonFile.close()
@@ -284,7 +284,7 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
         surfaceJsonForServer = createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList,numNorthSegments)
         l = dict()
         l['configurationKey'] = random.randint(1,254)
-        l['robotId'] = '"'+currentRobot+'"'
+        l['assetId'] = '"'+currentRobot+'"'
         l['surfaceMap'] = json.dumps(surfaceJsonForServer)
         surfaceJsonForServerList.append(l)
         newJsonFile.close()
@@ -305,7 +305,7 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
     lengthRowN=0
     lengthRowS=0
     widthSegment = 0
-    numStrips = 0
+    numStrips = 0j
 
     for line in robotSegmentsList:
 
@@ -386,17 +386,18 @@ def main(argv):
         return
     numRows,numRobots,surfaceJsonForServerList = tempRes
     print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
-    
+    res = '['
     for t in surfaceJsonForServerList:
         ListLength = len(surfaceJsonForServerList)
         l=0
-        res='{'
+        res=res + '{'
         for j in t:
             res = res+'"'+str(j)+'": '+str(t[j])
             if l < ListLength:
                 res = res+','
-        surfaceMapJsonsForServerFile.write(res+'}\n') 
+        res = res.removesuffix(',') +'},\n' 
         l = l+1
-
+    res = res.removesuffix(',\n') + ']'
+    surfaceMapJsonsForServerFile.write(res)
 if __name__=="__main__":
     main(sys.argv)
