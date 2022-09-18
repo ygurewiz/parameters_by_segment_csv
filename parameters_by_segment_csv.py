@@ -13,21 +13,21 @@ def createParmeterChangeList(csvParametersReader):
     data = {}
     for row in csvParametersReader:
         robot = row['Row']
-        isSeverLengthwise = row['isSeverLengthwise']
+        isSeverLengthwise = row['isServerLengthwise']
         data[robot] = row
-        data['isSeverLengthwise'] = isSeverLengthwise
+        data['isServerLengthwise'] = isSeverLengthwise
     return data
 
-def createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList,numNorthSegments):
+def createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList):
 
     parking_type = data['parking_type']
     robotName = robotSegmentsList[0]['Row']
-    res,surfaceJsonForServer = createJsonData(data,robotSegmentsList,numNorthSegments,parameterChangeList[robotName]['isSeverLengthwise'])           ##############################surfaceJsonForServer
+    res,surfaceJsonForServer = createJsonData(data,robotSegmentsList,parameterChangeList[robotName]['isServerLengthwise'])           ##############################surfaceJsonForServer
 
     if(not parameterChangeList==[]):
         paramData = parameterChangeList[robotName] 
         for p in paramData:
-            if (p =='Row') or (p=='isSeverLengthwise'):
+            if (p =='Row') or (p=='isServerLengthwise'):
                 continue
             res[p] = [int(paramData[p])] 
 
@@ -118,60 +118,37 @@ def getsurfaceJsonData(surfaceJsonData):
         res.append(p)
     return res
 
-def createJsonData(data,robotSegmentsList,numNorthSegments,isSeverLengthwise):
+def createJsonData(data,robotSegmentsList,isSeverLengthwise):
     res = {}
-    if isSeverLengthwise=='TRUE':
-        allignment = True
-    else:
-        allignment = False
     surfaceJsonForServer = []            ##############################surfaceJsonForServer
-    numSegments = 0
     for param in data:
         if(param=='surface_map'):
             res[param]=[]
             surfaceJsonData = data[param]
-            p = len(robotSegmentsList)
-            last = 1
+            allignment = 0
+            numSurfaces = len(robotSegmentsList)
             for i in range(len(surfaceJsonData)):
-                if(i>len(robotSegmentsList)-1):
-                    if allignment:
-                        surfaceJsonData[i]['allignment'] = 1
-                    if(last==1):
-                        surfaceJsonData[i]['type']=0
-                        #surfaceJsonData[i]['width']=0 ####protect from invalid
-                        #surfaceJsonData[i]['length']=0 ####protect from invalid
-                        #surfaceJsonData[i]['west']=0 ####protect from invalid
-                        surfaceJsonData[i]['east']=0 ####protect from invalid
-                        last = 0
-                    else:
-                        surfaceJsonData[i]['type']=0 
-                        surfaceJsonData[i]['width']=0 
-                        surfaceJsonData[i]['length']=0
-                        surfaceJsonData[i]['west']=0
-                        surfaceJsonData[i]['east']=0
-                    
+                if(i>(numSurfaces-1)):
+                    surfaceJsonData[i]['type']=0
+                    surfaceJsonData[i]['length']=0
+                    surfaceJsonData[i]['width'] = 500
+                    surfaceJsonData[i]['east']=0 ####protect from invalid
+                    if isSeverLengthwise:
+                        surfaceJsonData[i]['allignment'] = allignment
                     res[param].append(surfaceJsonData[i])
                     continue
                 surfaceDict = robotSegmentsList[i]
-                if(numSegments<numNorthSegments):
-                    if allignment:
-                        surfaceJsonData[i]['allignment'] = 0
-                    if surfaceJsonData[i]['type']==2:
-                        numSegments=numSegments+1
-                elif surfaceJsonData[i]['type']==1:
-                    if allignment:
-                        surfaceJsonData[i]['allignment'] = 0
-                else:
-                    if allignment:
-                        surfaceJsonData[i]['allignment'] = 1
-                
+
+                if surfaceDict['Entity']=='Docking':
+                    allignment = 1
+
+                if isSeverLengthwise:
+                    surfaceJsonData[i]['allignment'] = allignment
 
                 surfaceJsonData[i]['width']=int(float(surfaceDict['width(M)'])*1000)
                 surfaceJsonData[i]['type']=int(surfaceDict['type(B=3,D=1,T=2)'])
                 surfaceJsonData[i]['length']=int(float(surfaceDict['length(M)'])*1000)
                 surfaceJsonData[i]['west']=int(float(surfaceDict['west(BridgeCenter)'])*1000)
-                
-
 
                 if(surfaceDict["Entity"]=='Docking'):
                     if(surfaceDict['parking_type']=='Central'):
@@ -200,7 +177,7 @@ def createJsonData(data,robotSegmentsList,numNorthSegments,isSeverLengthwise):
 
                 res[param].append(surfaceJsonData[i])  
                 
-                surfaceJsonForServer = getsurfaceJsonData(surfaceJsonData[:p])              ##############################surfaceJsonForServer
+            surfaceJsonForServer = getsurfaceJsonData(surfaceJsonData[:len(robotSegmentsList)])              ##############################surfaceJsonForServer
                 #print(surfaceJsonForServer)                              ##############################surfaceJsonForServer
         else:
             res[param]=[]
@@ -210,7 +187,7 @@ def createJsonData(data,robotSegmentsList,numNorthSegments,isSeverLengthwise):
     
 
 def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,parameterFixFileName):
-    i=1
+    i=0
     numRobots = 0
     surfaceCSVfileName = csvSurfacesFileName.split('.csv')[0] +'_Surface_Per_Robot.csv'
     surfaceCSVfile = open(surfaceCSVfileName,'w')
@@ -260,14 +237,14 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
                     newRobot = True
                     doneList = robotSegmentsList
                     if(len(robotSegmentsList)>0):
-                        numNorthSegments = addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList)
-                        if numNorthSegments ==0:
-                            return 0
+                        if(not addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList)):
+                            print('ERROR_IN_CSV')
+                        
                     robotSegmentsList = list()
                     numRobots+=1
 
                     newJsonFile = open(jsonPath+'\\'+doneRobot+'.json','+w')
-                    surfaceJsonForServer = createJsonFileLines(doneList,data,newJsonFile,parameterChangeList,numNorthSegments) 
+                    surfaceJsonForServer = createJsonFileLines(doneList,data,newJsonFile,parameterChangeList) 
                     l = dict()
                     l['configurationKey'] = random.randint(1,254)
                     l['assetId'] = '"'+doneRobot+'"'
@@ -277,11 +254,12 @@ def parseLines(csvSurfacesFileName,robotParamsFileName,VersionName,jsonPath,para
                 
                 robotSegmentsList.append(line)
         if(len(robotSegmentsList)>0):
-            addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList)
+            if not (addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList)):
+                print('ERROR_IN_CSV')
     
-                
+        numRobots+=1        
         newJsonFile = open(jsonPath+'\\'+currentRobot+'.json','+w')
-        surfaceJsonForServer = createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList,numNorthSegments)
+        surfaceJsonForServer = createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList)
         l = dict()
         l['configurationKey'] = random.randint(1,254)
         l['assetId'] = '"'+currentRobot+'"'
@@ -305,7 +283,7 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
     lengthRowN=0
     lengthRowS=0
     widthSegment = 0
-    numStrips = 0j
+    numStrips = 0
 
     for line in robotSegmentsList:
 
@@ -335,7 +313,7 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
         numStrips=10
     else:
         print('UNKNOWN_WIDTH_ERROR')
-        return 0
+        return False
 
     rowAreaN = round(lengthRowN*widthSegment,0)
     rowAreaS = round(lengthRowS*widthSegment,0)
@@ -352,15 +330,15 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
             theLine = '{0},{1},{2},{3},{4},{5},{6},{7},{8}'.format(currentRobot,numSouthSegments,numNorthSegments,dockingType,dockingSide,rowAreaN,rowAreaS,numSequencesN,numSequencesS)
         else:
             print('PARSE_ERROR')
-            return 0
+            return False
     elif(dockingType=='Central' or dockingType=='Nadec' or dockingType=='Nadec_Edge'):
         theLine = '{0},{1},{2},{3},{4},{5},{6},{7},{8}'.format(currentRobot,numNorthSegments,numSouthSegments,dockingType,dockingSide,rowAreaN,rowAreaS,numSequencesN,numSequencesS)
     else:
         print('PARSE_ERROR_2')
-        return 0
+        return False
     surfaceCSVfile.write(theLine)
     surfaceCSVfile.write('\n')
-    return numNorthSegments
+    return True
                 
 
 

@@ -12,7 +12,7 @@
     <Name>parameters_by_segment_csv</Name>
     <RootNamespace>parameters_by_segment_csv</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Users\user\Ecoppia\V&amp;V and FE Team - Documents\Deployment Projects\Israel\T4 Nir Chen\Upgrade\Parameters\1.45.1_p2.107 - TLV for server"</CommandLineArguments>
+    <CommandLineArguments>"C:\Users\user\Ecoppia\V&amp;V and FE Team - Documents\Deployment Projects\Israel\T4 Revivim\LENGTHWISE CLEANING\Upgrade\1.47.24 p2.121 - TLV"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
