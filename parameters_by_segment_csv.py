@@ -311,6 +311,8 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
         numStrips=6
     elif wholeWidth==3:
         numStrips=10
+    elif wholeWidth==5:
+        numStrips = 14
     else:
         print('UNKNOWN_WIDTH_ERROR')
         return False
