@@ -12,7 +12,7 @@
     <Name>parameters_by_segment_csv</Name>
     <RootNamespace>parameters_by_segment_csv</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>"C:\Users\user\Ecoppia\V&amp;V and FE Team - Documents\Deployment Projects\Israel\T4 Shoval\Upgrade\1.47.24_p2.121 - TLV"</CommandLineArguments>
+    <CommandLineArguments>"C:\Users\user\Ecoppia\V&amp;V and FE Team - Documents\Deployment Projects\Israel\T4 Zarhia\Upgrade\Parameters\Pre-Alpha - Yael &amp; Yoel\1.51.34_P2.166"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

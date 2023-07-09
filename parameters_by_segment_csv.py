@@ -122,6 +122,8 @@ def createJsonData(data,robotSegmentsList,isSeverLengthwise):
     res = {}
     surfaceJsonForServer = []            ##############################surfaceJsonForServer
     for param in data:
+        #print(json.dumps(data))
+        #print('\n\n\n\n\n')
         if(param=='surface_map'):
             res[param]=[]
             surfaceJsonData = data[param]
@@ -163,11 +165,11 @@ def createJsonData(data,robotSegmentsList,isSeverLengthwise):
                         data["parking_type"]=5
                     elif(surfaceDict['parking_type']=='Nadec_Edge'):
                         data["parking_type"]=6
-
-                    if(surfaceDict['parking_side']=='South'):
-                        data["parking_side"]=0
-                    elif(surfaceDict['parking_side']=='North'):
-                        data["parking_side"]=1
+                    if not (data.get('parking_side')==None):
+                        if(surfaceDict['parking_side']=='South'):
+                            data["parking_side"]=0
+                        elif(surfaceDict['parking_side']=='North'):
+                            data["parking_side"]=1
 
                 elif(surfaceDict["Entity"]=='Gap'):
                     surfaceJsonData[i]['type']=0
