@@ -135,8 +135,8 @@ def createJsonData(data,robotSegmentsList,isSeverLengthwise):
                     surfaceJsonData[i]['length']=0
                     surfaceJsonData[i]['width'] = 500
                     surfaceJsonData[i]['east']=0 ####protect from invalid
-                    if isSeverLengthwise:
-                        surfaceJsonData[i]['allignment'] = allignment
+                    #if isSeverLengthwise:
+                    #    surfaceJsonData[i]['alignment'] = allignment
                     res[param].append(surfaceJsonData[i])
                     continue
                 surfaceDict = robotSegmentsList[i]
@@ -144,8 +144,8 @@ def createJsonData(data,robotSegmentsList,isSeverLengthwise):
                 if surfaceDict['Entity']=='Docking':
                     allignment = 1
 
-                if isSeverLengthwise:
-                    surfaceJsonData[i]['allignment'] = allignment
+                #if isSeverLengthwise:
+                #    surfaceJsonData[i]['alignment'] = allignment
 
                 surfaceJsonData[i]['width']=int(float(surfaceDict['width(M)'])*1000)
                 surfaceJsonData[i]['type']=int(surfaceDict['type(B=3,D=1,T=2)'])
