@@ -5,8 +5,9 @@ import json
 import string
 import string
 import os
-import subprocess
+#import subprocess
 import random
+import keyboard
 
 
 def createParmeterChangeList(csvParametersReader):
@@ -41,8 +42,7 @@ def createJsonFileLines(robotSegmentsList,data,newJsonFile,parameterChangeList):
             addLineToJson(False,headToken,res,newJsonFile,True)
         else:
             addLineToJson(False,headToken,res,newJsonFile,False)
-        #if(headToken=='distance_reverse_after_wall_collision'):
-         #   print('t')
+
     addLineToJson(True,'}\n',res,newJsonFile,True)
     return surfaceJsonForServer         ##############################surfaceJsonForServer
  
@@ -112,9 +112,13 @@ def addLineToJson(istoken,headToken,res,newJsonFile,islast):
 
 def getsurfaceJsonData(surfaceJsonData):
     res = []
+    alignment=0
     for p in surfaceJsonData:
         if p['type']==0:
             break
+        if p['type']==1:
+            alignment=1
+        p['alignment'] = alignment
         res.append(p)
     return res
 
@@ -135,17 +139,12 @@ def createJsonData(data,robotSegmentsList,isSeverLengthwise):
                     surfaceJsonData[i]['length']=0
                     surfaceJsonData[i]['width'] = 500
                     surfaceJsonData[i]['east']=0 ####protect from invalid
-                    #if isSeverLengthwise:
-                    #    surfaceJsonData[i]['alignment'] = allignment
                     res[param].append(surfaceJsonData[i])
                     continue
                 surfaceDict = robotSegmentsList[i]
 
                 if surfaceDict['Entity']=='Docking':
                     allignment = 1
-
-                #if isSeverLengthwise:
-                #    surfaceJsonData[i]['alignment'] = allignment
 
                 surfaceJsonData[i]['width']=int(float(surfaceDict['width(M)'])*1000)
                 surfaceJsonData[i]['type']=int(surfaceDict['type(B=3,D=1,T=2)'])
@@ -344,7 +343,20 @@ def addNumSegmentsCSV(surfaceCSVfile,robotSegmentsList):
     surfaceCSVfile.write('\n')
     return True
                 
-
+def createJsonFileForServer(surfaceJsonForServerList):
+    res = '['
+    for t in surfaceJsonForServerList:
+        ListLength = len(surfaceJsonForServerList)
+        l=0
+        res=res + '{'
+        for j in t:
+            res = res+'"'+str(j)+'": '+str(t[j])
+            if l < ListLength:
+                res = res+','
+        res = res.removesuffix(',') +'},\n' 
+        l = l+1
+    res = res.removesuffix(',\n') + ']'
+    return res
 
 
 
@@ -367,19 +379,11 @@ def main(argv):
         print('ERROR_IN_SURFACE_MAP_EXCEL_CSV')
         return
     numRows,numRobots,surfaceJsonForServerList = tempRes
+    
+    surfaceMapJsonsForServerFile.write(createJsonFileForServer(surfaceJsonForServerList))
     print("number of rows parsed = {} and number of robot files created = {}".format(numRows, numRobots))
-    res = '['
-    for t in surfaceJsonForServerList:
-        ListLength = len(surfaceJsonForServerList)
-        l=0
-        res=res + '{'
-        for j in t:
-            res = res+'"'+str(j)+'": '+str(t[j])
-            if l < ListLength:
-                res = res+','
-        res = res.removesuffix(',') +'},\n' 
-        l = l+1
-    res = res.removesuffix(',\n') + ']'
-    surfaceMapJsonsForServerFile.write(res)
+    keyboard.read_key()
+    return
+
 if __name__=="__main__":
     main(sys.argv)
